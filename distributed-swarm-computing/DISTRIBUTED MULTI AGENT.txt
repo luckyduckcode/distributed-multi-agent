@@ -1,0 +1,76 @@
+DISTRIBUTED MULTI-AGENT AUTOMATION SYSTEM
+Pragmatic Architecture Rough Draft
+Version: 0.1 (April 2026)
+Scale: 1 Master + 3 Servants (expandable to 10+ nodes)
+
+1. High-Level Overview
+   - Goal: Combine reliable DevOps execution (Ansible over SSH) with intelligent multi-agent AI for automated patching, monitoring, failover, configuration management, and workload orchestration across distributed computers.
+   - Design Principle: Centralized intelligence (on master) + Distributed execution (on all nodes).
+   - Orchestration: Docker Swarm for container deployment, service discovery, scaling, and failover.
+   - Isolation: Each node runs its sub-agent inside a Docker container.
+   - Communication: Swarm overlay network + HTTP API calls.
+
+2. Node Roles
+   - Master Node (Swarm Manager):
+     - Runs Docker Swarm manager.
+     - Hosts the Central AI Brain service (replicated, placement constraint: manager only).
+     - May also run monitoring/coordination tools.
+     - Has SSH key access to all nodes and external targets if needed.
+
+   - Servant Nodes (Swarm Workers):
+     - Join the Swarm as workers.
+     - Run lightweight sub-agent containers (global mode: one per node).
+     - Perform local tasks and call the central AI brain when more intelligence is required.
+     - Can execute Ansible playbooks or direct SSH commands.
+
+3. Core Components and Layers
+
+   Layer 1: Infrastructure & Orchestration
+   - Docker (container runtime on every node)
+   - Docker Swarm (cluster management, overlay networking, service discovery)
+   - Ansible (execution engine for safe, idempotent changes over SSH)
+
+   Layer 2: AI & Agents
+   - Central AI Brain:
+       - Hermes Agent (self-improving, persistent memory) or Ollama + custom FastAPI wrapper
+       - Exposed as OpenAI-compatible API (e.g., http://ai-brain:8000)
+       - Handles reasoning, planning, task decomposition, and delegation
+   - Sub-Node Agents (one per computer):
+       - Recommended: PicoClaw (lightweight, low-resource) or Hermes sub-agent in Docker
+       - Runs inside its own container
+       - Local autonomy + calls central brain API as needed
+       - Mounted volumes: SSH keys, Docker socket (optional), workspaces
+
+   Layer 3: Communication & Coordination
+   - Swarm overlay network for internal service discovery (no external port exposure needed)
+   - Sub-agents → Central Brain: HTTP calls
+   - Agents ↔ Agents: Optional peer communication or via central coordinator
+   - External access: Optional reverse proxy or messaging (Telegram/Discord) on master
+
+4. Data Flow Example (Automated Patching Task)
+   1. User or scheduled task tells central brain: "Keep all servers patched and healthy."
+   2. Central brain decomposes task and delegates via API.
+   3. Sub-agents on each node receive instructions.
+   4. Sub-agent checks local status (monitoring).
+   5. If needed, sub-agent calls central brain for decision.
+   6. Sub-agent triggers Ansible playbook (mounted or installed in container).
+   7. Ansible runs SSH commands safely across targets.
+   8. Results reported back; central brain learns and improves future skills.
+
+5. Scaling Plan
+   - Adding a new computer: Install Docker → join Swarm as worker → sub-agent deploys automatically (global mode).
+   - High availability: Increase replicas of central brain (if resources allow) or add manager nodes later.
+   - Resource considerations: Master should have more CPU/RAM/GPU for the AI brain.
+
+6. Security & Isolation Notes
+   - SSH keys mounted read-only where possible.
+   - Containers run with limited privileges.
+   - Swarm overlay network keeps internal traffic private.
+   - Ansible provides audited, idempotent execution.
+
+7. Future Enhancements
+   - True nested Docker (privileged mode) if deeper isolation needed.
+   - Event-driven triggers (Prometheus + alerts → agents).
+   - Multi-region expansion with Swarm.
+
+This is a pragmatic, buildable starting point. Start small with 4 nodes, test one workflow (e.g., monitoring + patching), then expand.

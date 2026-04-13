@@ -1,0 +1,59 @@
+DEFINITIONS & EXPLANATIONS
+Distributed Multi-Agent Automation System with Docker Swarm
+
+1. Docker
+   Definition: Platform for packaging applications and dependencies into portable, isolated containers.
+   Role here: Ensures every agent and service runs in a consistent environment across all computers. Makes deployment and updates simple.
+
+2. Docker Swarm
+   Definition: Docker's native clustering and orchestration tool. Turns multiple Docker hosts into one logical cluster with built-in service discovery, load balancing, scaling, and failover.
+   Role here: Automatically deploys and manages the central AI brain and sub-agents across your master and servant computers. Sub-nodes discover the AI brain by name (e.g., ai-brain) without hard-coded IPs.
+
+3. Swarm Manager
+   Definition: The control node in a Docker Swarm cluster responsible for orchestration decisions.
+   Role here: Your "master" computer. It runs the central AI brain and coordinates the entire cluster.
+
+4. Swarm Worker
+   Definition: Nodes that execute the actual container workloads.
+   Role here: Your "servant" computers (and future additions). They run the sub-agent containers.
+
+5. Central AI Brain
+   Definition: The main intelligent component (Hermes Agent or Ollama-based service) that performs high-level reasoning, planning, and task delegation.
+   Role here: Acts as the shared "brain" that all sub-agents can call via API when they need complex decisions. Runs only on the master for resource efficiency.
+
+6. Sub-Node Agent (or Sub-Agent)
+   Definition: Lightweight AI agent running on each computer. Specialized for local tasks but can ask the central brain for help.
+   Role here: Provides distributed execution and local autonomy. Deployed inside a Docker container on every node (including master).
+
+7. Multi-Agent System
+   Definition: Multiple AI agents working together, each with possible specialized roles, communicating and delegating tasks.
+   Role here: Central brain + multiple sub-agents form a team that handles automation intelligently rather than with rigid scripts.
+
+8. Ansible
+   Definition: Agentless automation tool that uses SSH to configure and manage systems consistently and safely.
+   Role here: The reliable execution layer. Agents call Ansible playbooks to perform patching, configuration, monitoring actions, etc.
+
+9. Hermes Agent
+   Definition: Open-source, self-improving autonomous AI agent from Nous Research. It builds skills from experience and supports multiple backends (including SSH and Docker).
+   Role here: Strong candidate for the central brain due to its persistence and learning capabilities.
+
+10. PicoClaw
+    Definition: Ultra-lightweight AI agent framework designed for low-resource devices and edge use.
+    Role here: Ideal for sub-node agents because it has a tiny footprint and can run efficiently on every servant computer.
+
+11. Overlay Network
+    Definition: Swarm's built-in virtual network that allows containers on different hosts to communicate securely as if on the same machine.
+    Role here: Enables sub-agents to reach the central AI brain easily using a service name.
+
+12. Global Service Mode (in Swarm)
+    Definition: A deployment mode where exactly one task of the service runs on every node in the cluster.
+    Role here: Used for the sub-agent so every computer automatically gets its own instance.
+
+How the Pieces Relate
+- Docker + Swarm provide the foundation for consistent, scalable deployment.
+- Ansible supplies safe, auditable execution over SSH.
+- Central AI Brain supplies high-level intelligence.
+- Sub-Node Agents (in Docker) provide distributed presence and local action.
+- The combination gives you centralized smart planning with decentralized, resilient execution — perfect for managing 4+ computers now and scaling later.
+
+This setup is pragmatic, mostly open-source, and avoids unnecessary complexity while delivering real distributed agentic automation.
